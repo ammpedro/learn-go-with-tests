@@ -26,7 +26,7 @@ func TestRacer(t *testing.T) {
 	}
 }
 
-func TestRacerSelect(t *testing.T) {
+func TestConcurrentRacer(t *testing.T) {
 
 	t.Run("should return winner", func(t *testing.T) {
 		slowServer := makeDelayedServer(20 * time.Millisecond)
@@ -40,7 +40,7 @@ func TestRacerSelect(t *testing.T) {
 		fastURL := fastServer.URL
 
 		want := fastURL
-		got, err := RacerSelect(slowURL, fastURL)
+		got, err := ConcurrentRacer(slowURL, fastURL)
 
 		if err != nil {
 			t.Fatalf("received unexpected error: %v", err)

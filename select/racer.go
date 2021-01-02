@@ -24,8 +24,8 @@ func measureResponseTime(url string) time.Duration {
 	return time.Since(start)
 }
 
-//RacerSelect accepts two urls and returns the faster one using a Goroutine
-func RacerSelect(a, b string) (winner string, error error) {
+//ConcurrentRacer accepts two urls and returns the faster one using a Goroutine
+func ConcurrentRacer(a, b string) (winner string, error error) {
 	return ConfigurableRacer(a, b, 10*time.Second)
 }
 
