@@ -10,15 +10,28 @@ import (
 const finalWord = "Go!"
 const countdownStart = 3
 
-// Sleeper is used in mocking
+// Sleeper is ...
 type Sleeper interface {
 	Sleep()
 }
 
-type DefaultSleeper struct{}
+// // DefaultSleeper ...
+// type DefaultSleeper struct{}
 
-func (d *DefaultSleeper) Sleep() {
-	time.Sleep(1 * time.Second)
+// // Sleep sleeps for 1 second
+// func (d *DefaultSleeper) Sleep() {
+// 	time.Sleep(1 * time.Second)
+// }
+
+// ConfigurableSleeper ...
+type ConfigurableSleeper struct {
+	duration time.Duration
+	sleep    func(time.Duration)
+}
+
+// Sleep is configurable
+func (c *ConfigurableSleeper) Sleep() {
+	c.sleep(c.duration)
 }
 
 // Countdown displays a countdown
@@ -32,7 +45,7 @@ func Countdown(out io.Writer, sleeper Sleeper) {
 }
 
 func main() {
-	sleeper := &DefaultSleeper{}
+	sleeper := &ConfigurableSleeper{2 * time.Second, time.Sleep}
 
 	// send data to os.Stdout for users to see the countdown on the terminal
 	Countdown(os.Stdout, sleeper)
