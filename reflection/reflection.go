@@ -1,6 +1,8 @@
 package reflection
 
-import "reflect"
+import (
+	"reflect"
+)
 
 //walk accepts an interface and a function
 func walk(x interface{}, fn func(input string)) {
@@ -11,6 +13,18 @@ func walk(x interface{}, fn func(input string)) {
 	}
 
 	switch val.Kind() {
+	case reflect.Chan:
+		//iterate through all values sent through channel until it was closed with Recv()
+		// see Recv func() (x Value, ok bool)
+		for v, ok := val.Recv(); ok; v, ok = val.Recv() {
+			walk(v.Interface(), fn)
+		}
+	case reflect.Func:
+		//Call calls the function v with the input arguments in.
+		valFnResult := val.Call(nil)
+		for _, res := range valFnResult {
+			walk(res.Interface(), fn)
+		}
 	case reflect.Struct:
 		for i := 0; i < val.NumField(); i++ {
 			walkValue(val.Field(i))
