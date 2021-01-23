@@ -1,19 +1,11 @@
-package convert
+package converter
 
 import (
 	"fmt"
 	"testing"
 )
 
-func assertConversion(t *testing.T, got, want string) {
-	t.Helper()
-
-	if got != want {
-		t.Errorf("got %q but want %q", got, want)
-	}
-}
-
-func TestRomanNumerals(t *testing.T) {
+func TestConverter(t *testing.T) {
 	cases := []struct {
 		Arabic int
 		Roman  string
@@ -44,7 +36,7 @@ func TestRomanNumerals(t *testing.T) {
 		{Arabic: 90, Roman: "XC"},
 		{Arabic: 150, Roman: "CL"},
 		{Arabic: 190, Roman: "CXC"},
-		{Arabic: 448, Roman: "LDXLVIII"},
+		{Arabic: 448, Roman: "CDXLVIII"},
 		{Arabic: 500, Roman: "D"},
 		{Arabic: 900, Roman: "CM"},
 		{Arabic: 1000, Roman: "M"},
@@ -55,7 +47,22 @@ func TestRomanNumerals(t *testing.T) {
 
 	for _, test := range cases {
 		t.Run(fmt.Sprintf("%d should be %q", test.Arabic, test.Roman), func(t *testing.T) {
-			assertConversion(t, ConvertToRoman(test.Arabic), test.Roman)
+			got := ToRoman(test.Arabic)
+			want := test.Roman
+			if got != want {
+				t.Errorf("got %q but want %q", got, want)
+			}
+		})
+	}
+
+	for _, test := range cases {
+		t.Run(fmt.Sprintf("%q should be %d", test.Roman, test.Arabic), func(t *testing.T) {
+			got := ToArabic(test.Roman)
+			want := test.Arabic
+
+			if got != want {
+				t.Errorf("got %d but want %d", got, want)
+			}
 		})
 	}
 }
