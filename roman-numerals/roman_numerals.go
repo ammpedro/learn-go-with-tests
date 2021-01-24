@@ -4,7 +4,7 @@ import "strings"
 
 //RomanNumeral describes a symbol and arabic value
 type RomanNumeral struct {
-	Value  int
+	Value  uint16
 	Symbol string
 }
 
@@ -12,7 +12,7 @@ type RomanNumeral struct {
 type RomanNumerals []RomanNumeral
 
 //ValueOf returns value of a roman numeral symbol
-func (r RomanNumerals) ValueOf(symbols ...byte) int {
+func (r RomanNumerals) ValueOf(symbols ...byte) uint16 {
 	symbol := string(symbols)
 	for _, s := range r {
 		if s.Symbol == symbol {
@@ -39,7 +39,7 @@ var allRomanNumerals = RomanNumerals{
 }
 
 // ToRoman accepts int and returns roman numeral string
-func ToRoman(arabic int) string {
+func ToRoman(arabic uint16) string {
 	var result strings.Builder
 	for _, numeral := range allRomanNumerals {
 		for arabic >= numeral.Value {
@@ -51,46 +51,21 @@ func ToRoman(arabic int) string {
 }
 
 // ToArabic accepts roman numeral string and returns arabic int
-func ToArabic(roman string) int {
-	total := 0
+func ToArabic(roman string) uint16 {
+	var total uint16 = 0
 
 	for i := 0; i < len(roman); i++ {
-		total += allRomanNumerals.ValueOf(roman[i])
+		total = total + allRomanNumerals.ValueOf(roman[i])
 
-		if i != 0 && roman[i] == 'V' {
-			if roman[i-1] == 'I' {
-				total -= 2
-			}
-		}
-
-		if i != 0 && roman[i] == 'X' {
-			if roman[i-1] == 'I' {
-				total -= 2
-			}
-		}
-
-		if i != 0 && roman[i] == 'L' {
-			if roman[i-1] == 'X' {
-				total -= 20
-			}
-		}
-
-		if i != 0 && roman[i] == 'C' {
-			if roman[i-1] == 'X' {
-				total -= 20
-			}
-		}
-
-		if i != 0 && roman[i] == 'D' {
-			if roman[i-1] == 'C' {
-				total -= 200
-			}
-		}
-
-		if i != 0 && roman[i] == 'M' {
-			if roman[i-1] == 'C' {
-				total -= 200
-			}
+		switch {
+		case i != 0 && (roman[i] == 'V' || roman[i] == 'X') && roman[i-1] == 'I':
+			total -= 2
+		case i != 0 && (roman[i] == 'L' || roman[i] == 'C') && roman[i-1] == 'X':
+			total -= 20
+		case i != 0 && (roman[i] == 'D' || roman[i] == 'M') && roman[i-1] == 'C':
+			total -= 200
+		default:
+			total += 0
 		}
 	}
 

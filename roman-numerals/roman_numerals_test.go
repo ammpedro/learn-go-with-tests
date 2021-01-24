@@ -3,11 +3,12 @@ package converter
 import (
 	"fmt"
 	"testing"
+	"testing/quick"
 )
 
 func TestConverter(t *testing.T) {
 	cases := []struct {
-		Arabic int
+		Arabic uint16
 		Roman  string
 	}{
 		{Arabic: 1, Roman: "I"},
@@ -64,5 +65,23 @@ func TestConverter(t *testing.T) {
 				t.Errorf("got %d but want %d", got, want)
 			}
 		})
+	}
+}
+
+func TestPropertiesOfConversion(t *testing.T) {
+	assertion := func(arabic uint16) bool {
+		if arabic > 3999 {
+			return true
+		}
+		t.Log("testing", arabic)
+		roman := ToRoman(arabic)
+		fromRoman := ToArabic(roman)
+		return fromRoman == arabic
+	}
+
+	if err := quick.Check(assertion, &quick.Config{
+		MaxCount: 1000,
+	}); err != nil {
+		t.Error("failed checks", err)
 	}
 }
