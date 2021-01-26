@@ -11,9 +11,20 @@ type Point struct {
 	Y float64
 }
 
+const secondHandLength = 90
+const clockCenterX = 150
+const clockCenterY = 150
+
 // SecondHand accepts time and returns the equivalent endpoint on the clock
 func SecondHand(t time.Time) Point {
-	return Point{150, 60}
+	p := secondHandPoint(t)
+	//scale for the secondhand
+	p = Point{p.X * secondHandLength, p.Y * secondHandLength}
+	//flip, because the origin is in the top left
+	p = Point{p.X, -p.Y}
+	//tanslate, because the origin is in {150,150}
+	p = Point{p.X + clockCenterX, p.Y + clockCenterY}
+	return p
 }
 
 // secondsInRadians accepts time and returns radian value
