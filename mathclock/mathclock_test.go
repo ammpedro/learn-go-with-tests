@@ -8,30 +8,6 @@ import (
 	"time"
 )
 
-func TestSecondHandAtMidnight(t *testing.T) {
-
-	tm := time.Date(1337, time.January, 1, 0, 0, 0, 0, time.UTC)
-
-	want := Point{X: 150, Y: 150 - 90}
-	got := SecondHand(tm)
-
-	if got != want {
-		t.Errorf("got %v, but want %v", got, want)
-	}
-}
-
-func TestSecondHandAt30Seconds(t *testing.T) {
-
-	tm := time.Date(1337, time.January, 1, 0, 0, 30, 0, time.UTC)
-
-	want := Point{X: 150, Y: 150 + 90}
-	got := SecondHand(tm)
-
-	if got != want {
-		t.Errorf("got %v, but want %v", got, want)
-	}
-}
-
 func TestSecondsInRadians(t *testing.T) {
 	cases := []struct {
 		time  time.Time
@@ -48,7 +24,7 @@ func TestSecondsInRadians(t *testing.T) {
 		t.Run(getTestName(c.time), func(t *testing.T) {
 			got := secondsInRadians(c.time)
 
-			if got != c.angle {
+			if !roughlyEqualFloat(got, c.angle) {
 				t.Errorf("got %v rad, but want %v", got, c.angle)
 			}
 		})
@@ -86,7 +62,7 @@ func TestMinutesInRadians(t *testing.T) {
 	for _, c := range cases {
 		t.Run(getTestName(c.time), func(t *testing.T) {
 			got := minutesInRadians(c.time)
-			if got != c.angle {
+			if !roughlyEqualFloat(c.angle, got) {
 				t.Fatalf("Wanted %v, but got %v", c.angle, got)
 			}
 		})
@@ -106,6 +82,47 @@ func TestMinuteHandPoint(t *testing.T) {
 		t.Run(getTestName(c.time), func(t *testing.T) {
 			got := minuteHandPoint(c.time)
 			if !roughlyEqualPoint(got, c.point) {
+				t.Fatalf("Wanted %v Point, but got %v", c.point, got)
+			}
+		})
+	}
+}
+
+func TestHoursInRadians(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		angle float64
+	}{
+		{simpleTime(6, 0, 0), math.Pi},
+		{simpleTime(0, 0, 0), 0},
+		{simpleTime(21, 0, 0), math.Pi * 1.5},
+		{simpleTime(0, 1, 30), math.Pi / ((6 * 60 * 60) / 90)},
+	}
+
+	for _, c := range cases {
+		t.Run(getTestName(c.time), func(t *testing.T) {
+			got := hoursInRadians(c.time)
+			if !roughlyEqualFloat(got, c.angle) {
+				t.Fatalf("Wanted %v radians, but got %v", c.angle, got)
+			}
+		})
+	}
+}
+
+func TestHourHandPoint(t *testing.T) {
+	cases := []struct {
+		time  time.Time
+		point Point
+	}{
+		{simpleTime(6, 0, 0), Point{0, -1}},
+		{simpleTime(21, 0, 0), Point{-1, 0}},
+	}
+
+	for _, c := range cases {
+		t.Run(getTestName(c.time), func(t *testing.T) {
+			got := hourHandPoint(c.time)
+
+			if !roughlyEqualPoint(c.point, got) {
 				t.Fatalf("Wanted %v Point, but got %v", c.point, got)
 			}
 		})
@@ -202,7 +219,30 @@ func TestSVGWriterMinuteHand(t *testing.T) {
 			xml.Unmarshal(b.Bytes(), &svg)
 
 			if !containsLine(c.line, svg.Line) {
-				t.Errorf("Expected to find the minutehand line %+v in the SVG output %+v", c.line, svg.Line)
+				t.Errorf("Expected to find the minute hand line %+v in the SVG output %+v", c.line, svg.Line)
+			}
+		})
+	}
+}
+
+func TestSVGWriterHourHand(t *testing.T) {
+	cases := []struct {
+		time time.Time
+		line Line
+	}{
+		{simpleTime(6, 0, 0), Line{150, 150, 150, 200}},
+	}
+
+	for _, c := range cases {
+		t.Run(getTestName(c.time), func(t *testing.T) {
+			b := bytes.Buffer{}
+			SVGWriter(&b, c.time)
+
+			svg := SVG{}
+			xml.Unmarshal(b.Bytes(), &svg)
+
+			if !containsLine(c.line, svg.Line) {
+				t.Errorf("Expected to find the hour hand line %+v, in the SVG lines %+v", c.line, svg.Line)
 			}
 		})
 	}
